@@ -98,10 +98,9 @@ export default {
                 );
                 let tokenBody = data.split(".")[1];
                 let userData = JSON.parse(Base64.decode(tokenBody));
-                let name = userData.sub;
-                let group = userData.auth;
-                let wizard = userData.wizard;
-                let avatarUrl = userData.avatar;
+                let name = userData.sub.username;
+                let group = userData.sub.auth;
+                let avatarUrl = userData.sub.avatar;
                 let groupName = "非法用户";
                 if (group.includes("ROLE_ADMIN")) {
                   groupName = "系统管理员";
@@ -120,7 +119,6 @@ export default {
                 this.$store.commit("loginInit", [
                   name,
                   groupName,
-                  wizard,
                   avatarUrl
                 ]);
                 axios.defaults.headers.common["Authorization"] = data;
