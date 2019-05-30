@@ -8,35 +8,34 @@
         v-loading="nodesListLoading"
       >
         <el-table-column type="selection" width="30"></el-table-column>
-        <el-table-column prop="id" label="uid" align="center" width="50">
+        <el-table-column prop="id" label="#" align="center" width="50">
         </el-table-column>
         <el-table-column
           prop="name"
           label="节点名称"
-          align="center"
-          width="300"
+          align="left"
+          min-width="150"
+          max-width="500"
+        >
+        </el-table-column>
+        <el-table-column
+          prop="tag"
+          label="节点标签"
+          align="left"
+          max-width="150"
         >
         </el-table-column>
         <el-table-column
           prop="healthStatus"
           label="健康状态"
           align="center"
-          width="90"
+          width="110"
           type="date"
         >
         </el-table-column>
         <el-table-column
-          prop="totalTrafficBytes"
-          label="总流量(GB)"
-          align="center"
-          width="200"
-          type="date"
-          :formatter="trafficFormatter"
-        >
-        </el-table-column>
-        <el-table-column
-          prop="usedTrafficBytes"
-          label="已用流量(GB)"
+          prop="remainingTrafficBytes"
+          label="剩余流量(GB)"
           align="center"
           width="200"
           type="date"
@@ -46,14 +45,14 @@
         <el-table-column
           prop="uploadUrl"
           label="上传地址"
-          align="center"
-          width="500"
+          align="left"
+          min-width="200"
           type="date"
         >
         </el-table-column>
         <el-table-column label="操作" width="150" fixed="right" align="center">
           <template slot-scope="scope">
-            <el-button size="mini" @click="editNode">编辑</el-button>
+            <el-button size="mini" @click="editNode(scope.row)">编辑</el-button>
             <el-button type="danger" size="mini" @click="removeNode(scope.row)"
               >删除
             </el-button>
@@ -94,36 +93,30 @@
       :modal-append-to-body="false"
     >
       <el-form :model="form" label-width="90px" :rules="formRules" ref="form">
-        <el-form-item label="名称" prop="name">
+        <el-form-item label="节点名称" prop="name">
           <el-input v-model="form.name" auto-complete="off"></el-input>
         </el-form-item>
-        <el-form-item label="上传地址" prop="uploadUrl">
+        <el-form-item label="节点标签" prop="tag">
+          <el-input v-model="form.tag" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="剩余流量" prop="remainingTrafficBytes">
           <el-input
-            v-model="form.uploadUrl"
+            v-model="form.remainingTrafficBytes"
             auto-complete="off"
-            type="password"
           ></el-input>
+        </el-form-item>
+        <el-form-item label="上传地址" prop="uploadUrl">
+          <el-input v-model="form.uploadUrl" auto-complete="off"></el-input>
         </el-form-item>
         <el-form-item label="下载地址" prop="downloadUrl">
-          <el-input
-            v-model="form.downloadUrl"
-            auto-complete="off"
-            type="password"
-          ></el-input>
-        </el-form-item>
-        <el-form-item label="健康检查" prop="healthCheckUrl">
-          <el-input
-            v-model="form.healthCheckUrl"
-            auto-complete="off"
-            type="email"
-          ></el-input>
+          <el-input v-model="form.downloadUrl" auto-complete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click.native="formVisible = false">取消</el-button>
         <el-button
           type="primary"
-          @click.native="addSubmit"
+          @click.native="formSubmit"
           :loading="formSubmitting"
           >提交
         </el-button>
@@ -150,15 +143,36 @@ export default {
       },
       form: {
         name: null,
+        tag: null,
         uploadUrl: null,
         downloadUrl: null,
-        healthCheckUrl: null,
-        roles: [],
-        status: 0
+        remainingTrafficBytes: 0
       },
       isAdd: true,
       formRules: {
-        name: [{ required: true, message: "节点名不能为空。", trigger: "blur" }]
+        name: [
+          { required: true, message: "节点名不能为空。", trigger: "blur" }
+        ],
+        tag: [
+          { required: true, message: "节点标签不能为空。", trigger: "blur" }
+        ],
+        uploadUrl: [
+          { required: true, message: "节点上传地址不能为空。", trigger: "blur" }
+        ],
+        downloadUrl: [
+          {
+            required: true,
+            message: "节点下载地址地址不能为空。",
+            trigger: "blur"
+          }
+        ],
+        remainingTrafficBytes: [
+          {
+            required: true,
+            message: "节点剩余流量不能为空。",
+            trigger: "blur"
+          }
+        ]
       },
       formVisible: false,
       formSubmitting: false
@@ -183,21 +197,48 @@ export default {
     addNode() {
       this.formVisible = true;
       this.isAdd = true;
+      this.form = {
+        name: null,
+        tag: null,
+        uploadUrl: null,
+        downloadUrl: null
+      };
     },
-    editNode() {
+    editNode(row) {
       this.formVisible = true;
       this.isAdd = false;
+      this.form = JSON.parse(JSON.stringify(row));
     },
-    addSubmit() {},
+    formSubmit() {
+      if (this.isAdd) {
+        addNode(this.form)
+          .then(resp => {
+            this.$message.success("节点添加成功！");
+            this.listNodes();
+          })
+          .catch(error => {
+            this.$message.error("节点添加失败：" + error);
+          });
+      } else {
+        editNode(this.form, [this.form.id])
+          .then(resp => {
+            this.$message.success("节点修改成功！");
+            this.listNodes();
+          })
+          .catch(error => {
+            this.$message.error("节点修改失败：" + error);
+          });
+      }
+    },
     batchRemove() {},
     removeNode(row) {
       deleteNode([row.id])
         .then(resp => {
-          this.$message.success("用户删除成功！");
+          this.$message.success("节点删除成功！");
           this.listNodes();
         })
         .catch(err => {
-          this.$message.warning("用户删除失败：" + err);
+          this.$message.error("节点删除失败：" + err);
         });
     },
     paging(val) {
@@ -210,7 +251,8 @@ export default {
     trafficFormatter(row, column) {
       const trafficrc = row[column.property];
       return (trafficrc / 1073741824).toFixed(4);
-    }
+    },
+    pulseTimeFormatter(row) {}
   },
   computed: {
     // ...mapGetters(["currentUser"]),

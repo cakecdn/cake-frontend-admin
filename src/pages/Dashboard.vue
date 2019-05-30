@@ -3,7 +3,7 @@
     <!--Stats cards-->
     <div class="row">
       <div
-        class="col-md-6 col-xl-3"
+        class="col-md-4 col-xl-4"
         v-for="stats in statsCards"
         :key="stats.title"
       >
@@ -30,7 +30,7 @@
     <div class="row">
       <div class="col-12">
         <chart-card
-          title="请求频度"
+          title="流量压力"
           sub-title="24 小时内"
           :chart-data="usersChart.data"
           :chart-options="usersChart.options"
@@ -39,9 +39,9 @@
             <i class="ti-reload"></i> Updated 3 minutes ago
           </span>
           <div slot="legend">
-            <i class="fa fa-circle text-info"></i> 出口请求
-            <i class="fa fa-circle text-danger"></i> 入口请求
-            <i class="fa fa-circle text-warning"></i> 域内请求
+            <i class="fa fa-circle text-info"></i> node-1
+            <i class="fa fa-circle text-danger"></i> node-2
+            <i class="fa fa-circle text-warning"></i> node-3
           </div>
         </chart-card>
       </div>
@@ -100,23 +100,15 @@ export default {
           type: "warning",
           icon: "ti-server",
           title: "总流量",
-          value: "4.69 TB",
+          value: "305.85 GB",
           footerText: "刚刚刷新",
           footerIcon: "ti-reload"
-        },
-        {
-          type: "success",
-          icon: "ti-wallet",
-          title: "充值营收",
-          value: "￥0",
-          footerText: "本月",
-          footerIcon: "ti-calendar"
         },
         {
           type: "danger",
           icon: "ti-pulse",
           title: "异常节点",
-          value: "2",
+          value: "1",
           footerText: "24小时内",
           footerIcon: "ti-timer"
         },
@@ -142,7 +134,7 @@ export default {
             "6:00AM"
           ],
           series: [
-            [287, 385, 90, 562, 191, 626, 524, 788, 101],
+            [287, 385, 90, 24, 191, 626, 524, 788, 101],
             [67, 152, 82, 240, 150, 435, 535, 642, 50],
             [23, 113, 67, 108, 140, 239, 307, 410, 40]
           ]

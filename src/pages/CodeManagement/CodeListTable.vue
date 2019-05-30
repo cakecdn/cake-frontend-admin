@@ -107,14 +107,16 @@
           <el-input v-model="form.traffic" auto-complete="off">
             <el-select
               v-model="form.trafficLabel"
-              slot="append"
               placeholder="请选择"
+              slot="append"
             >
-              <el-option label="B" value="B"></el-option>
-              <el-option label="KB" value="KB"></el-option>
-              <el-option label="MB" value="MB"></el-option>
-              <el-option label="GB" value="GB"></el-option>
-              <el-option label="TB" value="TB"></el-option>
+              <el-option
+                v-for="item in select"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              >
+              </el-option>
             </el-select>
           </el-input>
         </el-form-item>
@@ -165,6 +167,14 @@ export default {
       codes: [],
       codesSelected: [],
       codeListLoading: false,
+      select: [
+        { label: "B", value: "B" },
+        { label: "KB", value: "KB" },
+        { label: "MB", value: "MB" },
+        { label: "GB", value: "GB" },
+        { label: "TB", value: "TB" },
+        { label: "PB", value: "PB" }
+      ],
       pager: {
         page: 1,
         size: 10,
